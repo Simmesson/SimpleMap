@@ -52,7 +52,7 @@ int				hashmap_insert(hash_map_t *hm, const char *key, void *data);
 hash_pair_t		*hashmap_find(hash_map_t *hm, const char *key);
 int				hashmap_delete(hash_map_t *hm, const char *key, int flags);
 
-void			*hashmap_free(hash_map_t *hm);
+void			hashmap_free(hash_map_t *hm);
 
 
 // List of optimal primes stolen from GCC

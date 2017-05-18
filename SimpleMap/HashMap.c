@@ -245,8 +245,36 @@ static void hashmap_rehash(hash_map_t *hm)
 	hm->pHashTable = newMap;
 }
 
-void *hashmap_free(hash_map_t *hm)
+void hashmap_empty(hash_map_t *hm)
 {
+	for (uint32_t i = 0; i < hm->size; ++i)
+	{
+		if (!hm->pHashTable[i].pairs)
+			continue;
+
+		else 
+		{
+			for (int j = 0; j < hm->bucketSize; ++j)
+			{
+				if (hm->pHashTable[i].pairs[j])
+				{
+					free(hm->pHashTable[i].pairs[j]);
+					/*hm->pHashTable[i].pairs[j] = NULL;*/ // No need for NULL assignment when hashmap is gonna be totally emptied
+				}
+			}
+			free(hm->pHashTable[i].pairs);
+			hm->pHashTable[i].pairs = NULL; // Assign this though; could get used again
+		}
+		
+	}
+}
+
+void hashmap_free(hash_map_t *hm)
+{
+	if (!hashmap_isEmpty(hm))
+	{
+		hashmap_empty(hm);
+	}
 	free(hm->pHashTable);
 	free(hm);
 	hm->pHashTable = NULL;
