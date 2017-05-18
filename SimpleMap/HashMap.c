@@ -22,7 +22,7 @@ uint32_t prime_ge(uint32_t num) {
 		return g_a_sizes[i];
 	}
 
-	return NULL;
+	return 0;
 }
 
 static uint32_t __process_buf(uint32_t hashmap_size, const uint8_t *data, const uint32_t length);
@@ -31,7 +31,7 @@ static uint32_t __process_buf(uint32_t hashmap_size, const uint8_t *data, const 
 uint32_t process_string(uint32_t hashmap_size, const char *key) {
 	if (key == NULL || hashmap_size == 0)
 	{
-		return NULL;
+		return 0;
 	}
 	return __process_buf(hashmap_size, key, strlen(key));
 }
