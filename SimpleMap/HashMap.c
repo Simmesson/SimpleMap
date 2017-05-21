@@ -151,8 +151,7 @@ hash_map_t *hashmap_create(uint32_t size, int bucketSize)
 int hashmap_insert(hash_map_t *hm, const char *key, void *data)
 {
 	if (hm == NULL ||
-		key == NULL ||
-		data == NULL) 
+		key == NULL) 
 	{
 		return HASHMAP_INSERT_RECORD_FAIL;
 	}
