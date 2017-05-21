@@ -19,11 +19,11 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\SimpleMap-Fresh\SimpleMap-Fresh\HashMap.c" />
-    <ClCompile Include="..\..\SimpleMap-Fresh\SimpleMap-Fresh\main.c" />
+    <ClCompile Include="HashMap.c" />
+    <ClCompile Include="main.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\SimpleMap-Fresh\SimpleMap-Fresh\HashMap.h" />
+    <ClInclude Include="HashMap.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

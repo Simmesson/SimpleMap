@@ -15,15 +15,15 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\SimpleMap-Fresh\SimpleMap-Fresh\HashMap.c">
+    <ClCompile Include="HashMap.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\SimpleMap-Fresh\SimpleMap-Fresh\main.c">
+    <ClCompile Include="main.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\SimpleMap-Fresh\SimpleMap-Fresh\HashMap.h">
+    <ClInclude Include="HashMap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
