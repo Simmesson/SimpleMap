@@ -18,6 +18,13 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\SimpleMap-Fresh\SimpleMap-Fresh\HashMap.c" />
+    <ClCompile Include="..\..\SimpleMap-Fresh\SimpleMap-Fresh\main.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\SimpleMap-Fresh\SimpleMap-Fresh\HashMap.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{9A6736DE-F4A3-44DE-9570-AFCB1A79AE61}</ProjectGuid>
@@ -112,13 +119,6 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="HashMap.c" />
-    <ClCompile Include="main.c" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="HashMap.h" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
