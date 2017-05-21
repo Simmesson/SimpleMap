@@ -1,3 +1,4 @@
+//XXX: no header guard in sight lol
 #include <inttypes.h>
 
 #define HASHMAP_INSERT_RECORD_FAIL 0
@@ -55,6 +56,7 @@ int				hashmap_delete(hash_map_t *hm, const char *key, int flags);
 void			hashmap_free(hash_map_t *hm);
 
 
+//XXX what the fuck? a definition in the header?... lol
 // List of optimal primes stolen from GCC
 static const uint32_t g_a_sizes[30] =
 {
