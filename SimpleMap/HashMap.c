@@ -57,6 +57,7 @@ static uint32_t __process_buf(uint32_t hashmap_size, const uint8_t *data, const 
 }
 
 bool hashmap_isEmpty(hash_map_t *hm) {
+    //XXX: segfault if hm is NULL
 	if (hm->count != 0)
 		return false;
 
@@ -74,6 +75,7 @@ bool hashmap_isEmpty(hash_map_t *hm) {
 hash_map_t *hashmap_create(uint32_t size, int bucketSize)
 {
 	hash_map_t *map = malloc(sizeof(hash_map_t));
+    //XXX segfault if out of memory
 
 	if (size) {
 		// Make size next prime in predefined list
@@ -81,6 +83,7 @@ hash_map_t *hashmap_create(uint32_t size, int bucketSize)
 	}
 	else return NULL; /*size = prime_ge(STANDARD_TABLESIZE);*/
 
+    //XXX possible division by 0
 	if (size > (UINT32_MAX / bucketSize) || // Overflow
 		size == 0) 
 		return NULL;
@@ -90,6 +93,7 @@ hash_map_t *hashmap_create(uint32_t size, int bucketSize)
 #endif
 
 	map->pHashTable = calloc(size, sizeof(hash_bucket_t));
+    //XXX segfault if out of memory
 	map->size = size;
 	map->bucketSize = bucketSize;
 	map->count = 0;
@@ -101,6 +105,7 @@ hash_map_t *hashmap_create(uint32_t size, int bucketSize)
 // Returns non-zero if success by update or creation, otherwise NULL
 int hashmap_insert(hash_map_t *hm, const char *key, void *data)
 {
+    //XXX segfault if hm is NULL
 	uint32_t	hash_index = process_string(hm->size, key),
 		index = hash_index;
 
@@ -109,14 +114,17 @@ int hashmap_insert(hash_map_t *hm, const char *key, void *data)
 	if (hm->pHashTable[index].pairs == NULL)									// Allocate bucket
 	{
 		hm->pHashTable[index].pairs = calloc(hm->bucketSize, sizeof(hash_pair_t*));
+        //XXX segfault if out of memory
 		memset(hm->pHashTable[index].pairs, 0, hm->bucketSize * sizeof(hash_pair_t*));
 	}
 
+    // XXX: Why while(1)?
 	while (1)
 	{
 		if (hm->pHashTable[index].pairs[bucketIndex] == NULL)					// Allocate data pair
 		{
 			hm->pHashTable[index].pairs[bucketIndex] = malloc(sizeof(hash_pair_t));
+            //XXX segfault if out of memory
 			break;
 		}
 
@@ -152,6 +160,7 @@ int hashmap_insert(hash_map_t *hm, const char *key, void *data)
 	if (hm->flags == HASHMAP_FLAG_COPY_STRINGS) 
 	{
 		hm->pHashTable[index].pairs[bucketIndex]->key = malloc(strlen(key) + 1);
+        //XXX segfault if out of memory
 		strcpy(hm->pHashTable[index].pairs[bucketIndex]->key, key);
 	}
 	else 
@@ -167,6 +176,7 @@ int hashmap_insert(hash_map_t *hm, const char *key, void *data)
 // Returns the hash pair by the given key, or NULL if not found.
 hash_pair_t *hashmap_find(hash_map_t *hm, const char *key)
 {
+    //XXX segfault if hm is NULL
 	uint32_t index = process_string(hm->size, key);
 	int bucketIndex = 0;
 
@@ -191,10 +201,12 @@ hash_pair_t *hashmap_find(hash_map_t *hm, const char *key)
 
 static void hashmap_rehash(hash_map_t *hm) 
 {
+    //XXX segfault if hm is NULL
 	uint32_t newSize = prime_ge(hm->size + 1);
 	int newBucketSize = hm->bucketSize;
 
 	hash_bucket_t *newMap = (hash_bucket_t*)calloc(newBucketSize, newSize);
+    //XXX segfault if out of memory
 
 	for (uint32_t i = 0; i < hm->size; ++i) 
 	{
@@ -212,6 +224,7 @@ static void hashmap_rehash(hash_map_t *hm)
 			if (!newMap[index].pairs)
 			{
 				newMap[index].pairs = calloc(newBucketSize, sizeof(hash_pair_t*));
+                //XXX segfault if out of memory
 			}
 
 			do 
@@ -219,6 +232,7 @@ static void hashmap_rehash(hash_map_t *hm)
 				if (!newMap[index].pairs[bucketIndex]) // Allocate and then copy from prev map
 				{
 					newMap[index].pairs[bucketIndex] = malloc(sizeof(hash_pair_t));
+                    //XXX segfault if out of memoryy
 
 					*(newMap[index].pairs[bucketIndex]) = *(hm->pHashTable[i].pairs[0]);
 					newMap[index].pairs[bucketIndex]->hash = index;
@@ -247,6 +261,8 @@ static void hashmap_rehash(hash_map_t *hm)
 
 void hashmap_empty(hash_map_t *hm)
 {
+    //XXX: segfault if hm is NULL
+    // this function looks familiar lol
 	for (uint32_t i = 0; i < hm->size; ++i)
 	{
 		if (!hm->pHashTable[i].pairs)
@@ -275,6 +291,7 @@ void hashmap_free(hash_map_t *hm)
 	{
 		hashmap_empty(hm);
 	}
+    //XXX: segfault if hm is NULL
 	free(hm->pHashTable);
 	free(hm);
 	hm->pHashTable = NULL;
@@ -286,6 +303,7 @@ static void recount_bucket(hash_bucket_t *bucket, int bucketSize)
 	bool freeSpot = false;
 	for (int bucketindex = 0; bucketindex < bucketSize; ++bucketindex)
 	{
+        //XXX: segfault if bucket is NULL
 		if (bucket->pairs[bucketindex] != NULL) 
 		{
 			for (int j = bucketindex - 1; j >= 0 && freeSpot; --j)
@@ -310,6 +328,8 @@ static void recount_bucket(hash_bucket_t *bucket, int bucketSize)
 
 // Returns NULL if unsuccessful, otherwise HASHMAP_DELETE_RECORD_SUCCESS
 int hashmap_delete(hash_map_t *hm, const char *key, int flags) {
+    //XXX: segfault if hm is NULL
+    //XXX: segfault if key is NULL
 	uint32_t index = process_string(hm->size, key);
 
 	if (hm->pHashTable[index].pairs == NULL)
