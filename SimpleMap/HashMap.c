@@ -51,7 +51,7 @@ void hashmap_error(const char *fmt, ...)
 	char buf[1024] = { 0 };
 
 	va_start(args, fmt);
-	vsnprintf(buf, 1022, fmt, args);
+	vsnprintf(buf, 1023, fmt, args);
 	va_end(args);
 
 	fprintf(stderr, "Error: %s\n", buf);
@@ -140,9 +140,10 @@ hash_map_t *hashmap_create(uint32_t size, int bucketSize)
 		return NULL;
 	}
 
-	size = prime_ge(size); // Make size next prime in predefined list
+	size				= prime_ge(size);		// Make size next prime in predefined list
+	bucketSize			= 13;
 
-	if (size > (UINT32_MAX / bucketSize) || // Overflow
+	if (size > (UINT32_MAX / bucketSize) ||		// Overflow
 		size == 0) 
 	{
 		free(map);
@@ -274,7 +275,7 @@ hash_pair_t *hashmap_find(hash_map_t *hm, const char *key)
 {
 	if (hm == NULL)
 	{
-		hashmap_error("hashmap_find: Null pointer to hashmap passed");
+		hashmap_error("hashmap_find: Cannot find in hashmap at 0x%08x OR cannot use key at 0x%08x", hm, key);
 		return NULL;
 	}
 
