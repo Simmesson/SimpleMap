@@ -274,6 +274,9 @@ hash_pair_t *hashmap_find(hash_map_t *hm, const char *key)
 static void clean_map(hash_bucket_t *bucket_list, uint32_t size, int bucketSize)
 // Helper function for hashmap_rehash
 {
+	if (bucket_list == NULL)
+		return;
+
 	for (uint32_t i = 0; i < size; ++i)
 	{
 		if (bucket_list[size].pairs)
@@ -387,12 +390,11 @@ void hashmap_empty(hash_map_t *hm)
 			{
 				if (hm->pHashTable[i].pairs[j])
 				{
-					free(hm->pHashTable[i].pairs[j]);
-					/*hm->pHashTable[i].pairs[j] = NULL;*/ // No need for NULL assignment when hashmap is gonna be totally emptied
+					free(hm->pHashTable[i].pairs[j]); // No need for NULL assignment when hashmap is gonna be totally emptied
 				}
 			}
 			free(hm->pHashTable[i].pairs);
-			hm->pHashTable[i].pairs = NULL; // Assign this though; could get used again
+			hm->pHashTable[i].pairs = NULL; // could get used again
 		}
 
 	}
@@ -403,10 +405,7 @@ void hashmap_free(hash_map_t *hm)
 	if (hm == NULL)
 		return;
 
-	if (!hashmap_isEmpty(hm))
-	{
-		hashmap_empty(hm);
-	}
+	hashmap_empty(hm);
 	free(hm->pHashTable);
 	free(hm);
 	hm->pHashTable = NULL;
@@ -423,7 +422,10 @@ static void recount_bucket(hash_bucket_t *bucket, int bucketSize)
 	{
 		if (bucket->pairs[bucketindex] != NULL)
 		{
-			for (int j = bucketindex - 1; j >= 0 && freeSpot; --j)
+			for (int j = bucketindex - 1; 
+										j >= 0 
+										&& freeSpot; 
+										--j)
 			{
 				if (bucket->pairs[j])
 					continue;
