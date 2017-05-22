@@ -109,16 +109,19 @@ bool hashmap_isEmpty(hash_map_t *hm) {
 // Returns a pointer to a newly created hashmap object
 hash_map_t *hashmap_create(uint32_t size, int bucketSize)
 {
-	hash_map_t *map = malloc(sizeof(hash_map_t));
+	if (bucketSize <= 0)
+	{
+		return NULL;
+	}
+
+	hash_map_t *map		= malloc(sizeof(hash_map_t));
 
 	if (!map)
-		return NULL;
-
-	if (size && bucketSize > 0) 
 	{
-		size = prime_ge(size); // Make size next prime in predefined list
+		return NULL;
 	}
-	else return NULL; 
+
+	size = prime_ge(size); // Make size next prime in predefined list
 
 	if (size > (UINT32_MAX / bucketSize) || // Overflow
 		size == 0) 
@@ -156,8 +159,8 @@ int hashmap_insert(hash_map_t *hm, const char *key, void *data)
 		return HASHMAP_INSERT_RECORD_FAIL;
 	}
 
-	uint32_t	hash_index = process_string(hm->size, key),
-				index = hash_index;
+	uint32_t	hash_index	= process_string(hm->size, key),
+				index		= hash_index;
 
 
 	if (hm->pHashTable[index].pairs == NULL)									// Allocate bucket
