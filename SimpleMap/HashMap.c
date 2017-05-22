@@ -160,7 +160,7 @@ hash_map_t *hashmap_create(uint32_t size, int bucketSize)
 	if (!map->pHashTable)
 	{
 		free(map);
-		hashmap_error("hashmap_create: Out of memory", size, bucketSize);
+		hashmap_error("hashmap_create: Out of memory");
 		return NULL;
 	}
 
