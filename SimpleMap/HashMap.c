@@ -4,6 +4,7 @@
 #include <assert.h>
 #include <time.h>
 #include <stdbool.h>
+#include <stdarg.h>
 
 #include "HashMap.h"
 
@@ -43,6 +44,19 @@ static const uint32_t g_a_sizes[30] =
 };
 
 /*#define DEBUG*/ // if you want debug messages with compilers without DEBUG defined
+
+void hashmap_error(const char *fmt, ...)
+{
+	va_list args;
+	char buf[1024] = { 0 };
+
+	va_start(args, fmt);
+	vsnprintf(buf, 1022, fmt, args);
+	va_end(args);
+
+	fprintf(stderr, "Error: %s\n", buf);
+}
+
 
 static void hashmap_rehash(hash_map_t *hm);
 static void recount_bucket(hash_bucket_t *bucket, int bucketSize);
@@ -94,7 +108,9 @@ static uint32_t __process_buf(uint32_t hashmap_size, const uint8_t *data, const 
 bool hashmap_isEmpty(hash_map_t *hm) {
 
 	if (!hm || hm->count != 0)
+	{
 		return false;
+	}
 
 	for (uint32_t i = 0; i < hm->size; ++i)
 	{
@@ -104,6 +120,7 @@ bool hashmap_isEmpty(hash_map_t *hm) {
 	}
 
 	return true;
+
 }
 
 // Returns a pointer to a newly created hashmap object
@@ -111,6 +128,7 @@ hash_map_t *hashmap_create(uint32_t size, int bucketSize)
 {
 	if (bucketSize <= 0)
 	{
+		hashmap_error("hashmap_create: Cannot create hashmap with a bucketsize of %d", bucketSize);
 		return NULL;
 	}
 
@@ -118,6 +136,7 @@ hash_map_t *hashmap_create(uint32_t size, int bucketSize)
 
 	if (!map)
 	{
+		hashmap_error("hashmap_create: Out of memory");
 		return NULL;
 	}
 
@@ -127,6 +146,7 @@ hash_map_t *hashmap_create(uint32_t size, int bucketSize)
 		size == 0) 
 	{
 		free(map);
+		hashmap_error("hashmap_create: Size %ld and bucketsize %d cannot be handled", size, bucketSize);
 		return NULL;
 	}
 
@@ -139,6 +159,7 @@ hash_map_t *hashmap_create(uint32_t size, int bucketSize)
 	if (!map->pHashTable)
 	{
 		free(map);
+		hashmap_error("hashmap_create: Out of memory", size, bucketSize);
 		return NULL;
 	}
 
@@ -156,6 +177,7 @@ int hashmap_insert(hash_map_t *hm, const char *key, void *data)
 	if (hm == NULL ||
 		key == NULL) 
 	{
+		hashmap_error("hashmap_insert: Cannot insert into hashmap at 0x%08x OR cannot use key at 0x%08x", hm, key);
 		return HASHMAP_INSERT_RECORD_FAIL;
 	}
 
@@ -169,6 +191,7 @@ int hashmap_insert(hash_map_t *hm, const char *key, void *data)
 
 		if (hm->pHashTable[index].pairs == NULL)
 		{
+			hashmap_error("hashmap_insert: Out of memory");
 			return HASHMAP_INSERT_RECORD_FAIL;
 		}
 
@@ -183,6 +206,7 @@ int hashmap_insert(hash_map_t *hm, const char *key, void *data)
 
 			if (hm->pHashTable[index].pairs[bucketIndex] == NULL)
 			{
+				hashmap_error("hashmap_insert: Out of memory");
 				return HASHMAP_INSERT_RECORD_FAIL;
 			}
 
@@ -206,8 +230,11 @@ int hashmap_insert(hash_map_t *hm, const char *key, void *data)
 
 				hashmap_rehash(hm);
 
-				if (oldSize == hm->size)
+				if (oldSize == hm->size) 
+				{
+					hashmap_error("hashmap_insert: Failed rehash. Keeping old map without new entry.");
 					return HASHMAP_INSERT_RECORD_FAIL;
+				}
 #ifdef DEBUG
 				printf("Grew to %ld\n", hm->size);
 #endif
@@ -226,6 +253,7 @@ int hashmap_insert(hash_map_t *hm, const char *key, void *data)
 
 		if (hm->pHashTable[index].pairs[bucketIndex]->key == NULL)
 		{
+			hashmap_error("hashmap_insert: Out of memory");
 			return HASHMAP_INSERT_RECORD_FAIL;
 		}
 
@@ -246,6 +274,7 @@ hash_pair_t *hashmap_find(hash_map_t *hm, const char *key)
 {
 	if (hm == NULL)
 	{
+		hashmap_error("hashmap_find: Null pointer to hashmap passed");
 		return NULL;
 	}
 
@@ -267,7 +296,7 @@ hash_pair_t *hashmap_find(hash_map_t *hm, const char *key)
 		bucketIndex %= hm->bucketSize;
 
 		if (bucketIndex == 0)
-			return NULL;
+			break;
 	}
 
 	return NULL;
@@ -277,8 +306,11 @@ hash_pair_t *hashmap_find(hash_map_t *hm, const char *key)
 static void clean_map(hash_bucket_t *bucket_list, uint32_t size, int bucketSize)
 // Helper function for hashmap_rehash
 {
-	if (bucket_list == NULL)
+	if (bucket_list == NULL) 
+	{
+		hashmap_error("clean_map: Null pointer to bucketlist passed");
 		return;
+	}
 
 	for (uint32_t i = 0; i < size; ++i)
 	{
@@ -304,6 +336,7 @@ static void hashmap_rehash(hash_map_t *hm)
 {
 	if (hm == NULL)
 	{
+		hashmap_error("hashmap_rehash: Null pointer to hashmap passed");
 		return;
 	}
 	uint32_t newSize = prime_ge(hm->size + 1);
@@ -313,6 +346,7 @@ static void hashmap_rehash(hash_map_t *hm)
 
 	if (newMap == NULL)
 	{
+		hashmap_error("hashmap_rehash: Out of memory");
 		return;
 	}
 
@@ -336,6 +370,7 @@ static void hashmap_rehash(hash_map_t *hm)
 				if (newMap[index].pairs == NULL)
 				{
 					clean_map(newMap, newSize, newBucketSize);
+					hashmap_error("hashmap_rehash: Out of memory");
 					return;
 				}
 			}
@@ -349,6 +384,7 @@ static void hashmap_rehash(hash_map_t *hm)
 					if (newMap[index].pairs[bucketIndex] == NULL)
 					{
 						clean_map(newMap, newSize, newBucketSize);
+						hashmap_error("hashmap_rehash: Out of memory");
 						return;
 					}
 
@@ -380,7 +416,10 @@ static void hashmap_rehash(hash_map_t *hm)
 void hashmap_empty(hash_map_t *hm)
 {
 	if (hm == NULL)
+	{
+		hashmap_error("hashmap_empty: Null pointer to hashmap passed");
 		return;
+	}
 
 	for (uint32_t i = 0; i < hm->size; ++i)
 	{
@@ -399,14 +438,16 @@ void hashmap_empty(hash_map_t *hm)
 			free(hm->pHashTable[i].pairs);
 			hm->pHashTable[i].pairs = NULL; // could get used again
 		}
-
 	}
 }
 
 void hashmap_free(hash_map_t *hm)
 {
 	if (hm == NULL)
+	{
+		hashmap_error("hashmap_free: Null pointer to hashmap passed");
 		return;
+	}
 
 	hashmap_empty(hm);
 	free(hm->pHashTable);
@@ -418,7 +459,10 @@ void hashmap_free(hash_map_t *hm)
 static void recount_bucket(hash_bucket_t *bucket, int bucketSize)
 {
 	if (bucket == NULL)
+	{
+		hashmap_error("recount_bucket: Null pointer to bucket passed");
 		return;
+	}
 
 	bool freeSpot = false;
 	for (int bucketindex = 0; bucketindex < bucketSize; ++bucketindex)
@@ -451,13 +495,18 @@ static void recount_bucket(hash_bucket_t *bucket, int bucketSize)
 // Returns NULL if unsuccessful, otherwise HASHMAP_DELETE_RECORD_SUCCESS
 int hashmap_delete(hash_map_t *hm, const char *key, int flags) {
 	if (hm == NULL ||
-		key == NULL)
+		key == NULL) 
+	{
+		hashmap_error("hashmap_delete: Null pointer to hashmap (0x%08x) or key (0x%08x) passed", hm, key);
 		return HASHMAP_DELETE_RECORD_FAIL;
+	}
 
 	uint32_t index = process_string(hm->size, key);
 
-	if (hm->pHashTable[index].pairs == NULL)
+	if (hm->pHashTable[index].pairs == NULL) {
+		hashmap_error("hashmap_delete: No pairs found at index (%ld)!", index);
 		goto END;
+	}
 
 	int bucketIndex = 0;
 	do {
@@ -479,10 +528,11 @@ int hashmap_delete(hash_map_t *hm, const char *key, int flags) {
 		bucketIndex %= hm->bucketSize;
 	} while (bucketIndex != 0);
 
-END:
 #ifdef DEBUG
 	printf("Memory error: Couldn\'t find key \"%s\".", key);
 #endif
+
+END:
 	return HASHMAP_DELETE_RECORD_FAIL;
 }
 
@@ -572,6 +622,12 @@ uint32_t gen_key_list(hash_map_t *HashMap)
 void hashmap_benchmark()
 {
 	hash_map_t *HashMap = hashmap_create(1000 * 1000, 13);
+
+	if (HashMap == NULL) 
+	{
+		hashmap_error("hashmap_benchmark: Not able to create hashmap!");
+		return;
+	}
 
 	gen_key_list(HashMap);
 
