@@ -3,6 +3,7 @@ A simple 32-bit hash map implementation
 
 Just include HashMap.h and HashMap.c in your project and use the API as described below.
 At the moment, the one and only bucketsize is 13 (no. collisions before doubling the storage capability). 
+The library is not thread safe.
 
 # Windows
 To run the test on Windows, simply clone and open the project with Visual Studio 2017.
@@ -24,3 +25,8 @@ Quickstart: `git clone https://github.com/Simmesson/SimpleMap && cd SimpleMap/Si
 `int				  hashmap_delete(hash_map_t *hm, const char *key, int flags);` - Deletes the given key, returns non-zero if success.
 
 `void			    hashmap_free(hash_map_t *hm);` - To be called upon discarding the hashmap. Takes a pointer to your hashmap.
+
+
+# To-do
+* Variable prime bucketsize
+* Optimize algorithms
