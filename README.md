@@ -3,7 +3,7 @@ A simple 32-bit hash map implementation
 
 Just include HashMap.h and HashMap.c in your project and use the API as described below.
 At the moment, the one and only bucketsize is 13 (no. collisions before doubling the storage capability). 
-The library is not thread safe.
+The API is not thread safe.
 
 # Windows
 To run the test on Windows, simply clone and open the project with Visual Studio 2017.
