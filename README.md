@@ -13,7 +13,7 @@ Quickstart: `git clone https://github.com/Simmesson/SimpleMap && cd SimpleMap/Si
 
 # The API
 
-`void			    hashmap_benchmark();` - Performs a test in which it is storing, retrieving and then deleting 1 000 000 keys.
+`void			    hashmap_benchmark();` - Performs a test in which it is storing, retrieving and then deleting 1 000 000 keys. At the time of writing, this process takes around one second with an i7 2600k @ 4.4 GHz and with ram clocked at 1600 MHz.
 
 `hash_map_t		*hashmap_create(uint32_t size, int bucketSize);` - Creates a hash_map_t object and returns the pointer. Needs to be freed with hashmap_free when discarded.
 
